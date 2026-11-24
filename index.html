@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Winamp Cyber-Rack Pro // Ultimate Audio Workstation</title>
+  
+  <!-- Fontes e Ícones -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Estilo Nativo Isolado -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="ambient-glow" id="ambientGlow"></div>
+
+  <div class="app-container">
+    
+    <!-- CABEÇALHO DO RACK -->
+    <header class="rack-module console-header">
+      <div class="brand-group">
+        <div class="brand-badge">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">WINAMP // CYBER-RACK PRO</h1>
+          <p class="brand-subtitle">Universal Multi-Format • Rhythmic Synesthesia • Pure PT-BR Localization</p>
+        </div>
+      </div>
+
+      <!-- METRICAS DE DISPLAY & M3U -->
+      <div class="console-actions">
+        <div class="metrics-bay">
+          <div class="metric-item">
+            <span class="metric-label">KBPS</span>
+            <span class="metric-value led-amber" id="metricBitrate">320</span>
+          </div>
+          <div class="metric-separator"></div>
+          <div class="metric-item">
+            <span class="metric-label">KHZ</span>
+            <span class="metric-value led-cyan">44.1</span>
+          </div>
+          <div class="metric-separator"></div>
+          <div class="metric-item">
+            <span class="metric-label">MODE</span>
+            <span class="metric-value led-green">STEREO</span>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn btn-secondary" id="btnAddToM3u">
+            <i class="fa-solid fa-plus"></i> Fila (<span id="m3uQueueCount">0</span>)
+          </button>
+          <button type="button" class="btn btn-primary" id="btnExportM3u">
+            <i class="fa-solid fa-file-audio"></i> Baixar Playlist M3U+
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- BARRA DE BUSCA UNIVERSAL & GAVETA RETRÁTIL -->
+    <section class="rack-module search-module">
+      <div class="search-inputs">
+        <div class="input-search-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="searchInput" class="cyber-input" placeholder="Pesquisar qualquer música, vídeo ou lista M3U (Ex: Detalhes Roberto Carlos, Queen, Daft Punk...)" autocomplete="off">
+        </div>
+        <div class="input-url-wrapper">
+          <input type="url" id="directUrlInput" class="cyber-input" placeholder="Cole link de mídia (.mp3, .mp4, .flac, .m4a, .aac, .m3u...)">
+        </div>
+        <div class="search-buttons">
+          <button type="button" class="btn btn-primary btn-search" id="btnSearch">BUSCA UNIVERSAL</button>
+          <button type="button" class="btn btn-secondary" id="btnLoadDirect" title="Tocar URL direta"><i class="fa-solid fa-play"></i></button>
+        </div>
+      </div>
+
+      <!-- GAVETA RETRÁTIL DE RESULTADOS -->
+      <div id="resultsDrawer" class="results-drawer collapsed">
+        <div class="results-drawer-bar" id="drawerToggle">
+          <span id="drawerTitleText"><i class="fa-solid fa-list-ul"></i> Mídias e Listas M3U Encontradas (<span id="resultsCount">0</span> itens) — Clique para abrir/recolher</span>
+          <span class="drawer-toggle-icon" id="drawerToggleIcon"><i class="fa-solid fa-chevron-down"></i></span>
+        </div>
+        <div id="searchResultsList" class="results-list"></div>
+      </div>
+    </section>
+
+    <!-- WORKSPACE PRINCIPAL -->
+    <main class="workspace-grid">
+      
+      <!-- COLUNA DA ESQUERDA: DECK, VISUALIZADOR E MUSICOLOGIA (5 Colunas) -->
+      <div class="deck-column">
+        
+        <!-- DECK DO PLAYER WINAMP -->
+        <div class="rack-module player-deck">
+          
+          <!-- DISPLAY DE LED VERDE VFD -->
+          <div class="led-display">
+            <div class="led-header">
+              <span id="playerStateLabel" class="led-state">STANDBY // READY</span>
+              <span class="led-fft-indicator"><span class="ping-dot"></span> 60FPS RHYTHM-SYNC</span>
+            </div>
+            
+            <div class="led-main-info">
+              <img id="trackArtwork" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&auto=format&fit=crop&q=60" class="track-artwork" alt="Capa">
+              <div class="track-text-box">
+                <h2 id="displayTitle" class="track-title led-green-text">NENHUMA FAIXA CARREGADA</h2>
+                <p id="displayArtist" class="track-artist">Execute uma busca universal acima</p>
+              </div>
+              <div class="led-timer" id="displayTimer">00:00</div>
+            </div>
+
+            <div class="led-meta-footer">
+              <span id="displayGenre" class="badge-tag">GÊNERO: --</span>
+              <span id="displayYear" class="badge-tag badge-year">ANO ORIGINAL: --</span>
+              <span class="badge-tag badge-live" id="displayFormat">DIRECT AUDIO</span>
+            </div>
+          </div>
+
+          <!-- CANVAS DO VISUALIZADOR SINESTÉSICO (RHYTHM & MELODY REACTIVE) -->
+          <div class="canvas-viewport" id="canvasViewport">
+            <canvas id="synesthesiaCanvas"></canvas>
+            
+            <!-- SELETOR DE PRESETS VISUAIS -->
+            <div class="visualizer-overlay-controls">
+              <span class="overlay-tag">MODO:</span>
+              <button type="button" class="vis-btn active" data-mode="radial" title="Reator Radial Neoplasma (Pulso de Graves & Feixes)">RADIAL</button>
+              <button type="button" class="vis-btn" data-mode="bars" title="Winamp 32 Bandas LED Peak-Hold">WINAMP</button>
+              <button type="button" class="vis-btn" data-mode="warp" title="Túnel Hiperespaço Sincronizado">WARP</button>
+              <button type="button" class="vis-btn" data-mode="wave" title="Osciloscópio Fluido Lissajous">OSC</button>
+            </div>
+
+            <!-- VU METER ESTÉREO BALÍSTICO -->
+            <div class="vu-meter-cluster">
+              <span class="vu-label">VU</span>
+              <div class="vu-channel"><div class="vu-fill" id="vuMeterL"></div></div>
+              <div class="vu-channel"><div class="vu-fill" id="vuMeterR"></div></div>
+            </div>
+          </div>
+
+          <!-- REPRODUTOR NATIVO DE ÁUDIO (SEM DOWNLOAD) -->
+          <audio id="audioEngine" controls controlsList="nodownload" oncontextmenu="return false;" preload="auto"></audio>
+        </div>
+
+        <!-- RACK DE CRÉDITOS & MUSICOLOGIA RÍGIDA -->
+        <div class="rack-module musicology-module">
+          <div class="module-header">
+            <h3 class="module-title"><i class="fa-solid fa-users-viewfinder"></i> CRÉDITOS DISCRIMINADOS (MUSICBRAINZ)</h3>
+            <span class="module-badge" id="mbStatusBadge">STANDBY</span>
+          </div>
+
+          <div class="credit-boxes">
+            <div class="credit-box">
+              <span class="credit-label">Intérprete / Cantor(a) / Banda:</span>
+              <p class="credit-value" id="creditPerformer">--</p>
+            </div>
+            <div class="credit-box">
+              <span class="credit-label text-cyan"><i class="fa-solid fa-music"></i> Compositor(es) da Música:</span>
+              <p class="credit-value text-cyan-light" id="creditComposer">--</p>
+            </div>
+            <div class="credit-box">
+              <span class="credit-label text-emerald"><i class="fa-solid fa-pen-nib"></i> Letrista(s) / Autor(es) do Texto:</span>
+              <p class="credit-value text-emerald-light" id="creditLyricist">--</p>
+            </div>
+          </div>
+
+          <div class="module-header mt-3">
+            <h3 class="module-title"><i class="fa-brands fa-wikipedia-w"></i> HISTÓRIA ESPECÍFICA DA COMPOSIÇÃO</h3>
+            <span class="module-badge" id="wikiStatusBadge">WIKI</span>
+          </div>
+          <div class="wiki-content-box" id="wikiHistoryText">
+            <p class="placeholder-text">Pesquise uma faixa musical. A história documentada da composição e dados específicos do autor serão apresentados em Português do Brasil.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUNA DA DIREITA: MONITOR DUPLO DE LETRA & TRADUÇÃO (7 Colunas) -->
+      <div class="lyrics-column">
+        <div class="rack-module lyrics-module">
+          <div class="module-header">
+            <div>
+              <h3 class="module-title"><i class="fa-solid fa-language"></i> MONITOR DE LETRAS & TRADUÇÃO PT-BR</h3>
+              <p class="module-subtitle">Idioma Original Reconhecido Automaticamente • Tradução Obrigatória para Português (Brasil)</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnRetranslate">
+              <i class="fa-solid fa-rotate"></i> Retraduzir
+            </button>
+          </div>
+
+          <div class="lyrics-split-panel">
+            <!-- PAINEL DA LETRA ORIGINAL -->
+            <div class="lyrics-subpanel">
+              <div class="lyrics-subpanel-header">
+                <span>LETRA ORIGINAL (LRCLIB)</span>
+                <span class="lyrics-status" id="originalLyricsStatus">Aguardando</span>
+              </div>
+              <textarea id="originalLyricsArea" class="lyrics-textarea" placeholder="A letra original será carregada aqui no idioma em que foi cantada..."></textarea>
+            </div>
+
+            <!-- PAINEL DA TRADUÇÃO PT-BR -->
+            <div class="lyrics-subpanel">
+              <div class="lyrics-subpanel-header">
+                <span class="text-emerald">TRADUÇÃO PARA O PORTUGUÊS (BRASIL)</span>
+                <span class="lyrics-status text-emerald" id="translatedLyricsStatus">Pronto</span>
+              </div>
+              <div id="translatedLyricsArea" class="lyrics-view-box">
+                <span class="placeholder-text">A tradução convertida para o Português do Brasil aparecerá aqui.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RODAPÉ TÉCNICO -->
+    <footer class="rack-footer">
+      <span>WINAMP RETRO-MODERN AUDIO WORKSTATION</span> • 
+      <span>ZERO SILENT CORS MUTING</span> • 
+      <span>RHYTHM & MELODY DRIVEN SYNTHESIS</span>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
